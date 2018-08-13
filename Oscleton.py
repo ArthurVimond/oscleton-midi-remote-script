@@ -1,6 +1,7 @@
 from __future__ import with_statement
 from _Framework.ControlSurface import ControlSurface
 
+from OscletonApplicationComponent import OscletonApplicationComponent
 from OscletonSessionComponent import OscletonSessionComponent
 from OscletonMixerComponent import OscletonMixerComponent
 from OscletonTransportComponent import OscletonTransportComponent
