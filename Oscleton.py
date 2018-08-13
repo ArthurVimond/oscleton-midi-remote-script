@@ -12,6 +12,9 @@ from OscletonOSC import OscletonOSC
 
 class Oscleton(ControlSurface):
 
+    # MIDI Remote Script version
+    midi_remote_script_version = '0.1.0'
+
 
     def __init__(self, c_instance):
         super(Oscleton, self).__init__(c_instance)
@@ -25,6 +28,7 @@ class Oscleton(ControlSurface):
             OscletonMixin.set_log(self.log_message)
             
             self._app = OscletonApplicationComponent(1, 1)
+            self._app.setMidiRemoteScriptVersion(midi_remote_script_version)
             self._mixer = OscletonMixerComponent(1)
             self._session = OscletonSessionComponent(1,1)
             self._session.set_mixer(self._mixer)
