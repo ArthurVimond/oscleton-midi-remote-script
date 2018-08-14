@@ -28,7 +28,7 @@ class Oscleton(ControlSurface):
             OscletonMixin.set_log(self.log_message)
             
             self._app = OscletonApplicationComponent(1, 1)
-            self._app.setMidiRemoteScriptVersion(midi_remote_script_version)
+            self._app.setMidiRemoteScriptVersion(self.midi_remote_script_version)
             self._mixer = OscletonMixerComponent(1)
             self._session = OscletonSessionComponent(1,1)
             self._session.set_mixer(self._mixer)

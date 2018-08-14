@@ -12,9 +12,8 @@ class OscletonApplicationComponent(SessionComponent, OscletonMixin):
         self.add_callback('/live/config/script_version', self._script_version)
 
 
-    def setMidiRemoteScriptVersion(self, script_version) {
+    def setMidiRemoteScriptVersion(self, script_version):
         self.script_version = script_version
-    }
 
     # Live version Callback
     def _live_version(self, msg, src):
