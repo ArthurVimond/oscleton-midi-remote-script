@@ -31,10 +31,19 @@ class OscletonParameterComponent(ControlSurfaceComponent, OscletonMixin):
             s = list(self._parameter.canonical_parent.sends).index(self._parameter)   
             self.send('/live/'+self._track_types[ty]+'send', tid, s, self._parameter.value)
         
-        else:    
+        else:
+
+            track_name = self._parameter.canonical_parent.canonical_parent.name
+
             d = list(self._parameter.canonical_parent.canonical_parent.devices).index(self._parameter.canonical_parent)
-            
+            device_name = self._parameter.canonical_parent.canonical_parent.devices[d].name
+
             p = list(self._parameter.canonical_parent.parameters).index(self._parameter)
             
-            self.send('/live/'+self._track_types[ty]+'device/param', tid, d, p, str(self._parameter.name), self._parameter.value, self._parameter.min, self._parameter.max)
+            param_display_value = self._parameter.str_for_value(self._parameter.value)
+            param_value = self._parameter.value
+            param_min = self._parameter.min
+            param_max = self._parameter.max
+
+            self.send('/live/'+self._track_types[ty]+'device/param', tid, d, p, track_name, device_name, str(self._parameter.name), param_display_value, param_value, param_min, param_max)
             
