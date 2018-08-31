@@ -96,4 +96,5 @@ class OscletonOSC(object):
         port = msg[3]
         self.log_message('Oscleton: reconfigured to send to ' + host + ':' + str(port))
         self._remote_addr = (host, port)
+        self.send('/live/set_peer/success', True)
         
