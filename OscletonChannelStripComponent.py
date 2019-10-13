@@ -175,7 +175,7 @@ class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
     @subject_slot('value')
     def _on_volume_changed(self):
         self.log_message(str(self._track_id) +  ' ' + str(self._type) + str(self._track) + str(self._track == self.song().master_track))
-        self.send_default('/live/'+self._track_types[self._type]+'volume', self._track.mixer_device.volume.value)
+        self.send_default('/live/'+self._track_types[self._type]+'volume', self._track.name, self._track.mixer_device.volume.value)
 
     @subject_slot('value')
     def _on_panning_changed(self):
