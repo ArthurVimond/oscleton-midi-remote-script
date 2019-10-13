@@ -191,7 +191,7 @@ class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
 
     def _on_solo_changed(self):
         if self._type < 2 and self._type is not None:
-            self.send_default('/live/'+self._track_types[self._type]+'solo', self._track.solo)
+            self.send_default('/live/'+self._track_types[self._type]+'solo', self._track.name, self._track.solo)
 
     def _on_arm_changed(self):
         if self._type == 0 and self._type is not None and self._track.can_be_armed:
