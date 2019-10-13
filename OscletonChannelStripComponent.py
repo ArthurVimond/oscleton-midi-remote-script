@@ -187,7 +187,7 @@ class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
     # Callbacks
     def _on_mute_changed(self):
         if self._type < 2 and self._type is not None:
-            self.send_default('/live/'+self._track_types[self._type]+'mute', self._track.mute)
+            self.send_default('/live/'+self._track_types[self._type]+'mute', self._track.name, self._track.mute)
 
     def _on_solo_changed(self):
         if self._type < 2 and self._type is not None:
