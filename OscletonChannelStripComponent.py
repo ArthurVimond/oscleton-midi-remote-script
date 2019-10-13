@@ -179,7 +179,7 @@ class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
 
     @subject_slot('value')
     def _on_panning_changed(self):
-        self.send_default('/live/'+self._track_types[self._type]+'panning', self._track.mixer_device.panning.value)
+        self.send_default('/live/'+self._track_types[self._type]+'panning', self._track.name, self._track.mixer_device.panning.value)
 
     
 
