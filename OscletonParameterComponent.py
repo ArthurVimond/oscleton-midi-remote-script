@@ -44,6 +44,7 @@ class OscletonParameterComponent(ControlSurfaceComponent, OscletonMixin):
             param_value = self._parameter.value
             param_min = self._parameter.min
             param_max = self._parameter.max
+            automation_state = self._parameter.automation_state
 
-            self.send('/live/'+self._track_types[ty]+'device/param', tid, d, p, track_name, device_name, str(self._parameter.name), param_display_value, param_value, param_min, param_max)
+            self.send('/live/'+self._track_types[ty]+'device/param', tid, d, p, track_name, device_name, str(self._parameter.name), param_display_value, param_value, param_min, param_max, automation_state)
             
