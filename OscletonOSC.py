@@ -40,6 +40,7 @@ class OscletonOSC(object):
 
         self._callback_manager = OSC.CallbackManager()
         self._callback_manager.add('/live/set_peer', self._set_peer)
+        self._callback_manager.add('/live/config/discover_ip', self._discover_ip)
 
     def error(self):
         return self._in_error
@@ -97,4 +98,17 @@ class OscletonOSC(object):
         self.log_message('Oscleton: reconfigured to send to ' + host + ':' + str(port))
         self._remote_addr = (host, port)
         self.send('/live/set_peer/success', True)
+
+    def _discover_ip(self, msg, source):
+        host = msg[2]
+        if host == '':
+            host = source[0]
+        port = msg[3]
+
+        # Send back the computer IP
+        computer_ip = msg[4]
+
+        self.log_message('Oscleton: IP discovered with success for ' + host + ':' + str(port))
+        self._remote_addr = (host, port)
+        self.send('/live/config/discover_ip/success', computer_ip)
         
