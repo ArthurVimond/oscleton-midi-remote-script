@@ -44,6 +44,7 @@ class Oscleton(ControlSurface):
 
 
     def disconnect(self):
+        self.osc_handler.send('/live/quit', True)
         self.osc_handler.shutdown()
 
 
