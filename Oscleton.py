@@ -40,7 +40,7 @@ class Oscleton(ControlSurface):
 
             if not self.osc_handler.error():
                 self.show_message('Ready')
-                self.osc_handler.send('/live/startup', 1)
+                self.osc_handler.send('/live/start', True)
 
 
     def disconnect(self):
