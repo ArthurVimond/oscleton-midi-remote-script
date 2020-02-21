@@ -5,6 +5,7 @@ from OscletonApplicationComponent import OscletonApplicationComponent
 from OscletonSessionComponent import OscletonSessionComponent
 from OscletonMixerComponent import OscletonMixerComponent
 from OscletonTransportComponent import OscletonTransportComponent
+from OscletonPreferences import OscletonPreferences
 
 from OscletonMixin import OscletonMixin
 from OscletonOSC import OscletonOSC
@@ -22,10 +23,11 @@ class Oscleton(ControlSurface):
         with self.component_guard():
             OscletonOSC.set_log(self.log_message)
             OscletonOSC.set_message(self.show_message)
-            self.osc_handler = OscletonOSC()
-            
-            OscletonMixin.set_osc_handler(self.osc_handler)
             OscletonMixin.set_log(self.log_message)
+            
+            self.prefs = OscletonPreferences()            
+            self.osc_handler = OscletonOSC(self.prefs)
+            OscletonMixin.set_osc_handler(self.osc_handler)
             
             self._app = OscletonApplicationComponent(1, 1)
             self._app.setMidiRemoteScriptVersion(self.midi_remote_script_version)
