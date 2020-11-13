@@ -6,6 +6,7 @@ from OscletonSessionComponent import OscletonSessionComponent
 from OscletonMixerComponent import OscletonMixerComponent
 from OscletonTransportComponent import OscletonTransportComponent
 from OscletonPreferences import OscletonPreferences
+from OscletonUpdater import OscletonUpdater
 
 from OscletonMixin import OscletonMixin
 from OscletonOSC import OscletonOSC
@@ -34,6 +35,7 @@ class Oscleton(ControlSurface):
             self._session.set_mixer(self._mixer)
             self._transport = OscletonTransportComponent()
             self._prefs = OscletonPreferences()
+            self._updater = OscletonUpdater(self._prefs, self.midi_remote_script_version)
             
             self.parse()
 
@@ -46,6 +48,8 @@ class Oscleton(ControlSurface):
 
                 self.show_message('Ready')
                 self.osc_handler.send('/live/start', True)
+
+                self._updater.check_for_update()
 
 
     def disconnect(self):
