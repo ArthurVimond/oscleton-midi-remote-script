@@ -16,6 +16,7 @@ class OscletonTransportComponent(TransportComponent, OscletonMixin):
         self._on_tempo_changed.subject = s
         self._on_playing_changed.subject = s
         self._on_loop_changed.subject = s
+        self._on_can_capture_midi_changed.subject = s
     
         self.add_default_callback('/live/tempo', s, 'tempo', float)
         self.add_default_callback('/live/time', s, 'current_song_time', float)
@@ -77,6 +78,10 @@ class OscletonTransportComponent(TransportComponent, OscletonMixin):
     def _on_playing_changed(self):
         self.send('/live/play', self.song().is_playing)
 
+
+    @subject_slot('can_capture_midi')
+    def _on_can_capture_midi_changed(self):
+        self.send('/live/can_capture_midi', self.song().can_capture_midi)
 
 
     def _add_track(self, msg, src):
