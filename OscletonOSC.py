@@ -21,14 +21,9 @@ class OscletonOSC(object):
 
     _in_error = False
 
-    def __init__(self, prefs, remotehost = '192.168.0.1', remoteport=9001, localhost='', localport=9000):
+    def __init__(self, oscleton, remotehost = '192.168.0.1', remoteport=9001, localhost='', localport=9000):
 
-        self._prefs = prefs
-        self._linkedDeviceIp = self._prefs.get_linked_device_ip()
-        if self._linkedDeviceIp is not None and self._linkedDeviceIp is not "":
-            remotehost = self._linkedDeviceIp
-            self.log_message('Set remote host from preferences: ' + remotehost)
-
+        self.oscleton = oscleton
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._socket.setblocking(0)
 
@@ -96,6 +91,12 @@ class OscletonOSC(object):
         self._socket.close()
 
 
+    def set_peer(self, host):
+        (_, current_port) = self._remote_addr
+        self.log_message('Oscleton: reconfigured to send to ' + host + ':' + str(current_port))
+        self._remote_addr = (host, current_port)
+
+
     def _set_peer(self, msg, source):
         host = msg[2]
         if host == '':
@@ -104,7 +105,7 @@ class OscletonOSC(object):
         self.log_message('Oscleton: reconfigured to send to ' + host + ':' + str(port))
         self._remote_addr = (host, port)
         self.send('/live/set_peer/success', True)
-        self._prefs.set_linked_device_ip(host)
+        self.oscleton.set_linked_device_ip(host)
 
 
     def _discover_ip(self, msg, source):
@@ -119,5 +120,5 @@ class OscletonOSC(object):
         self.log_message('Oscleton: IP discovered with success for ' + host + ':' + str(port))
         self._remote_addr = (host, port)
         self.send('/live/config/discover_ip/success', computer_ip)
-        self._prefs.set_linked_device_ip(host)
+        self.oscleton.set_linked_device_ip(host)
         

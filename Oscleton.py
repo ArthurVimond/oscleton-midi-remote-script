@@ -24,9 +24,7 @@ class Oscleton(ControlSurface):
             OscletonOSC.set_log(self.log_message)
             OscletonOSC.set_message(self.show_message)
             OscletonMixin.set_log(self.log_message)
-            
-            self.prefs = OscletonPreferences()            
-            self.osc_handler = OscletonOSC(self.prefs)
+            self.osc_handler = OscletonOSC(self)
             OscletonMixin.set_osc_handler(self.osc_handler)
             
             self._app = OscletonApplicationComponent(1, 1)
@@ -35,10 +33,17 @@ class Oscleton(ControlSurface):
             self._session = OscletonSessionComponent(1,1)
             self._session.set_mixer(self._mixer)
             self._transport = OscletonTransportComponent()
+            self._prefs = OscletonPreferences()
             
             self.parse()
 
             if not self.osc_handler.error():
+
+                # Set remote host from preferences
+                linked_device_ip = self._prefs.get_linked_device_ip()
+                if linked_device_ip is not None and linked_device_ip is not '':
+                    self.osc_handler.set_peer(linked_device_ip)
+
                 self.show_message('Ready')
                 self.osc_handler.send('/live/start', True)
 
@@ -51,3 +56,7 @@ class Oscleton(ControlSurface):
     def parse(self):
         self.osc_handler.process()
         self.schedule_message(1, self.parse)
+    
+
+    def set_linked_device_ip(self, ip):
+        self._prefs.set_linked_device_ip(ip)
