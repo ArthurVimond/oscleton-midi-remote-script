@@ -26,10 +26,17 @@ class OscletonParameterComponent(ControlSurfaceComponent, OscletonMixin):
     def _on_value_changed(self):
         t = self._parameter.canonical_parent.canonical_parent
         tid, ty = self.track_id_type(t)
+        track_name = self._parameter.canonical_parent.canonical_parent.name
         
         if self._is_send:
-            s = list(self._parameter.canonical_parent.sends).index(self._parameter)   
-            self.send('/live/'+self._track_types[ty]+'send', tid, s, self._parameter.value)
+            s = list(self._parameter.canonical_parent.sends).index(self._parameter)
+            return_track = self.song().return_tracks[s]
+            return_track_name = return_track.name
+            send_value = self._parameter.value
+            send_display_value = self._parameter.str_for_value(self._parameter.value)
+            send_state = self._parameter.state
+            automation_state = self._parameter.automation_state
+            self.send('/live/'+self._track_types[ty]+'send', tid, track_name, s, return_track_name, send_value, send_display_value, send_state, automation_state)
         
         else:
 
