@@ -15,6 +15,7 @@ class OscletonTransportComponent(TransportComponent, OscletonMixin):
         self._on_signature_denominator_changed.subject = s
         self._on_tempo_changed.subject = s
         self._on_playing_changed.subject = s
+        self._on_loop_changed.subject = s
     
         self.add_default_callback('/live/tempo', s, 'tempo', float)
         self.add_default_callback('/live/time', s, 'current_song_time', float)
