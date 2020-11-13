@@ -33,7 +33,8 @@ class OscletonTransportComponent(TransportComponent, OscletonMixin):
     
         self.add_function_callback('/live/undo', s.undo)
         self.add_function_callback('/live/redo', s.redo)
-    
+
+        self.add_function_callback('/live/capture_midi', s.capture_midi)
         
         self.add_callback('/live/track/create', self._add_track);
         self.add_callback('/live/return/create', self._add_return_track);
