@@ -7,6 +7,7 @@ from OscletonMixerComponent import OscletonMixerComponent
 from OscletonTransportComponent import OscletonTransportComponent
 from OscletonPreferences import OscletonPreferences
 from OscletonUpdater import OscletonUpdater
+from OscletonBrowserComponent import OscletonBrowserComponent
 
 from OscletonMixin import OscletonMixin
 from OscletonOSC import OscletonOSC
@@ -36,6 +37,7 @@ class Oscleton(ControlSurface):
             self._transport = OscletonTransportComponent()
             self._prefs = OscletonPreferences()
             self._updater = OscletonUpdater(self._prefs, self.midi_remote_script_version)
+            self._browser = OscletonBrowserComponent()
             
             self.parse()
 
