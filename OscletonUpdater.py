@@ -44,7 +44,7 @@ class OscletonUpdater(SessionComponent, OscletonMixin):
             # Download the Oscleton MIDI Remote Script and save it to the temp Documents/Oscleton directory
             oscleton_dir_path = os.path.expanduser("~/Documents/Oscleton")
             script_file_path = oscleton_dir_path + "/oscleton.zip"
-            url = 'http://download.oscleton.com/midi-remote-script/' + latest_midi_remote_script_version + '/oscleton.zip'
+            url = 'https://oscleton.com/download/midi-remote-script/' + latest_midi_remote_script_version + '/oscleton.zip'
             self.log_message('Downloading latest Oscleton MIDI Remote Script: ' + latest_midi_remote_script_version)
 
             try:
