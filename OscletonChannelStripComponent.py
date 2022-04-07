@@ -101,17 +101,23 @@ class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
                 v = msg[3] if len(msg) == 4 else None
 
                 if self._track is not None:
-                    obj = getattr(self._track.mixer_device, property) if mixer else self._track
-                    pr = 'value' if mixer else property
-                    ot = float if mixer else int
-                    
-                    if v is not None:
-                        setattr(obj, pr, v)
-                    else:
-                        if self._type == 2:
-                            self.send('/live/master/'+property, ot(getattr(obj, pr)))
+                    if property is not 'send':
+                        obj = getattr(self._track.mixer_device, property) if mixer else self._track
+                        pr = 'value' if mixer else property
+                        ot = float if mixer else int
+                        if v is not None:
+                            setattr(obj, pr, v)
                         else:
-                            self.send_default('/live/'+self._track_types[self._type]+property, ot(getattr(obj, pr)))
+                            if self._type == 2:
+                                self.send('/live/master/'+property, ot(getattr(obj, pr)))
+                            else:
+                                self.send_default('/live/'+self._track_types[self._type]+property, ot(getattr(obj, pr)))
+                    else:
+                        # Sends
+                        send_id = msg[3]
+                        send_value = msg[4]
+                        send = self._sends[send_id]
+                        send.set_parameter_value(send_value)
 
         self.add_callback(addr, cb)
                           
