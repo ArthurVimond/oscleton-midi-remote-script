@@ -39,11 +39,12 @@ class OscletonDeviceComponent(DeviceComponent, OscletonMixin):
         self.log_message('set device')
         super(OscletonDeviceComponent, self).set_device(device)
 
-        self._track_id, self._type = self.track_id_type(device.canonical_parent)
-        self._device_id = list(device.canonical_parent.devices).index(device)
+        if device is not None:
+            self._track_id, self._type = self.track_id_type(device.canonical_parent)
+            self._device_id = list(device.canonical_parent.devices).index(device)
 
-        self._on_parameters_changed.subject = device
-        self._on_parameters_changed()
+            self._on_parameters_changed.subject = device
+            self._on_parameters_changed()
 
 
     @subject_slot('parameters')
