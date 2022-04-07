@@ -117,13 +117,6 @@ class OscletonDeviceComponent(DeviceComponent, OscletonMixin):
                     if v is not None:
                         prm.value = v
 
-                    # Send the current value of the parameter.
-                    # type 2 = master track
-                    if self._type == 2:
-                        self.send('/live/'+self._track_types[self._type]+'device/param', p, prm.name, prm.value)
-                    else:
-                        self.send_default('/live/'+self._track_types[self._type]+'device/param', p, prm.name, prm.value)
-
             # If a parameter id wasn't sent, send all the information about available parameters for this device.
             else:
                 prms = []
