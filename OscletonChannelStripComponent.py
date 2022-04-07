@@ -23,7 +23,7 @@ class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
         for t in [0, 1]:
             for p in ['mute', 'solo', 'arm']:
                 self.add_mixer_callback('/live/'+self._track_types[t]+p, p)
-            for p in ['volume', 'panning']:
+            for p in ['volume', 'panning', 'send']:
                 self.add_mixer_callback('/live/'+self._track_types[t]+p, p, 1)
         
         self.add_mixer_callback('/live/master/volume', 'volume', 1)
