@@ -16,7 +16,7 @@ from OscletonOSC import OscletonOSC
 class Oscleton(ControlSurface):
 
     # MIDI Remote Script version
-    midi_remote_script_version = '1.0.0'
+    midi_remote_script_version = '1.1.0'
 
 
     def __init__(self, c_instance):
