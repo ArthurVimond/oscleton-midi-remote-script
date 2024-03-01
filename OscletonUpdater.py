@@ -23,7 +23,7 @@ class OscletonUpdater(SessionComponent, OscletonMixin):
         app_track = self._prefs.get_app_track()
         app_platform = self._prefs.get_app_platform()
 
-        oscleton_api_base_url = 'https://oscleton.herokuapp.com/'
+        oscleton_api_base_url = 'https://api.oscleton.com/'
         latest_script_api_url = oscleton_api_base_url + 'v1/midi-remote-scripts/latest' + '?platform=' + app_platform + '&track=' + app_track
 
         need_update = False
