@@ -1,5 +1,5 @@
 from _Framework.SessionComponent import SessionComponent
-from OscletonMixin import OscletonMixin, wrap_init
+from .OscletonMixin import OscletonMixin, wrap_init
 
 class OscletonApplicationComponent(SessionComponent, OscletonMixin):
 
@@ -16,19 +16,19 @@ class OscletonApplicationComponent(SessionComponent, OscletonMixin):
         self.script_version = script_version
 
     # Live version Callback
-    def _live_version(self, msg, src):
+    def _live_version(self, msg):
         """ Get Live version
         """
         major_version = self.application().get_major_version()
         minor_version = self.application().get_minor_version()
         bugfix_version = self.application().get_bugfix_version()
 
-        full_version = `major_version` + "." + `minor_version` + "." + `bugfix_version`
+        full_version = str(major_version) + "." + str(minor_version) + "." + str(bugfix_version)
 
         self.send('/live/config/live_version', full_version)
 
     # MIDI Remote script version Callback
-    def _script_version(self, msg, src):
+    def _script_version(self, msg):
         """ Get MIDI Remote Script version
         """
         self.send('/live/config/script_version', self.script_version)

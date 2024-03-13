@@ -1,13 +1,11 @@
 from _Framework.DeviceComponent import DeviceComponent
 from _Framework.SubjectSlot import subject_slot
 
-
-from OscletonParameterComponent import OscletonParameterComponent
-from OscletonMixin import OscletonMixin
+from .OscletonMixin import OscletonMixin
+from .OscletonParameterComponent import OscletonParameterComponent
 
 
 class OscletonDeviceComponent(DeviceComponent, OscletonMixin):
-
 
     def __init__(self):
         self._parameters = []
@@ -15,11 +13,10 @@ class OscletonDeviceComponent(DeviceComponent, OscletonMixin):
 
         self.set_default('_track_id', '_device_id')
 
-        for ty in self._track_types:
-            self.add_callback('/live/'+ty+'device/range', self._device_range)
-            self.add_callback('/live/'+ty+'device/param', self._device_param)
-            self.add_callback('/live/'+ty+'device/select', self._view)
-
+        # for ty in self._track_types:
+        #     self.add_callback('/live/' + ty + 'device/range', self._device_range)
+        #     self.add_callback('/live/' + ty + 'device/param', self._device_param)
+        #     self.add_callback('/live/' + ty + 'device/select', self._view)
 
     def _is_device(self, msg):
         if 'return' in msg[0]:
@@ -34,9 +31,7 @@ class OscletonDeviceComponent(DeviceComponent, OscletonMixin):
 
         return check_id and self._type == ty and d == self._device_id
 
-
     def set_device(self, device):
-        self.log_message('set device')
         super(OscletonDeviceComponent, self).set_device(device)
 
         if device is not None:
@@ -46,10 +41,8 @@ class OscletonDeviceComponent(DeviceComponent, OscletonMixin):
             self._on_parameters_changed.subject = device
             self._on_parameters_changed()
 
-
     @subject_slot('parameters')
     def _on_parameters_changed(self):
-        self.log_message('params changed')
         diff = len(self._device.parameters) - len(self._parameters)
 
         if diff > 0:
@@ -57,17 +50,14 @@ class OscletonDeviceComponent(DeviceComponent, OscletonMixin):
                 self._parameters.append(OscletonParameterComponent())
 
         if diff < 0:
-            for i in range(len(self._parameters)-1, len(self._device.parameters)-1, -1):
+            for i in range(len(self._parameters) - 1, len(self._device.parameters) - 1, -1):
                 self._parameters[i].disconnect()
                 self._parameters.remove(self._parameters[i])
 
-        for i,pc in enumerate(self._parameters):
+        for i, pc in enumerate(self._parameters):
             pc.set_parameter(self._device.parameters[i])
 
-
-
-
-    def _device_range(self, msg, src):
+    def _device_range(self, msg):
         if self._is_device(msg) and self._device is not None:
             if self._type == 2:
                 d = msg[2] if len(msg) >= 3 else None
@@ -76,31 +66,30 @@ class OscletonDeviceComponent(DeviceComponent, OscletonMixin):
                 d = msg[3] if len(msg) >= 4 else None
                 p = msg[4] if len(msg) >= 5 else None
 
-
             if d is not None:
                 if p is not None:
                     if p < len(self._device.parameters):
                         prm = self._device.parameters[p]
                         # type 2 = master track
                         if self._type == 2:
-                            self.send('/live/'+self._track_types[self._type]+'device/range', self._device_id, p, prm.min, prm.max)
+                            self.send('/live/' + self._track_types[self._type] + 'device/range', self._device_id, p,
+                                      prm.min, prm.max)
                         else:
-                            self.send_default('/live/'+self._track_types[self._type]+'device/range', p, prm.min, prm.max)
+                            self.send_default('/live/' + self._track_types[self._type] + 'device/range', p, prm.min,
+                                              prm.max)
 
                 else:
                     prms = []
-                    for i,p in enumerate(self._device.parameters):
-                        prms.extend([i,p.min,p.max])
+                    for i, p in enumerate(self._device.parameters):
+                        prms.extend([i, p.min, p.max])
 
                     # type 2 = master track
                     if self._type == 2:
-                        self.send('/live/'+self._track_types[self._type]+'device/range', self._device_id, *prms)
+                        self.send('/live/' + self._track_types[self._type] + 'device/range', self._device_id, *prms)
                     else:
-                        self.send_default('/live/'+self._track_types[self._type]+'device/range', *prms)
+                        self.send_default('/live/' + self._track_types[self._type] + 'device/range', *prms)
 
-
-
-    def _device_param(self, msg, src):
+    def _device_param(self, msg):
         if self._is_device(msg) and self._device is not None:
             if self._type == 2:
                 p = msg[3] if len(msg) >= 4 else None
@@ -120,25 +109,22 @@ class OscletonDeviceComponent(DeviceComponent, OscletonMixin):
             # If a parameter id wasn't sent, send all the information about available parameters for this device.
             else:
                 prms = []
-                for i,p in enumerate(self._device.parameters):
-                    prms.extend([i,p.name, p.value])
+                for i, p in enumerate(self._device.parameters):
+                    prms.extend([i, p.name, p.value])
 
                 # type 2 = master track
                 if self._type == 2:
-                    self.send('/live/'+self._track_types[self._type]+'device/param', *prms)
+                    self.send('/live/' + self._track_types[self._type] + 'device/param', *prms)
                 else:
-                    self.send_default('/live/'+self._track_types[self._type]+'device/param', *prms)
+                    self.send_default('/live/' + self._track_types[self._type] + 'device/param', *prms)
 
-
-    def _view(self, msg, src):
+    def _view(self, msg):
         if self._is_device(msg) and self._device is not None:
             self.song().view.selected_track = self._device.canonical_parent
             self.song().view.select_device(self._device)
             self.application().view.show_view('Detail/DeviceChain')
 
-
-
-    def _envelope(self, msg, src):
+    def _envelope(self, msg):
         if self._is_device(msg):
             if self._type == 2:
                 p = msg[3] if len(msg) >= 4 else None
@@ -153,5 +139,3 @@ class OscletonDeviceComponent(DeviceComponent, OscletonMixin):
 
             if p < len(self._device.parameters) and t is not None:
                 prm = self._device.parameters[p]
-
-

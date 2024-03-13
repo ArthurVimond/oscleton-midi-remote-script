@@ -2,8 +2,8 @@ from _Framework.SceneComponent import SceneComponent
 from _Framework.Util import nop
 from _Framework.SubjectSlot import subject_slot
 
-from OscletonClipSlotComponent import OscletonClipSlotComponent
-from OscletonMixin import OscletonMixin, wrap_init
+from .OscletonClipSlotComponent import OscletonClipSlotComponent
+from .OscletonMixin import OscletonMixin, wrap_init
 
 from functools import wraps
 
@@ -29,7 +29,7 @@ class OscletonSceneComponent(SceneComponent, OscletonMixin):
         self.set_default('_scene_id')
         
         callbacks = {'color': 'color', 'name': 'name'}
-        for n,p in callbacks.iteritems():
+        for n,p in callbacks.items():
             self.add_simple_callback('/live/scene/'+n, '_scene', p, self._is_scene, getattr(self, '_on_scene_'+n+'_changed'))
         
         self.add_callback('/live/scene/play', self._fire)
@@ -88,8 +88,7 @@ class OscletonSceneComponent(SceneComponent, OscletonMixin):
     
     def update(self):
         if self._allow_updates:
-            if self._scene != None and self.is_enabled():
-                self.log_message('reassigning clips')
+            if self._scene is not None and self.is_enabled():
                 if self._scene is not None:
                     diff = len(self._scene.clip_slots) - len(self._clip_slots)
                     

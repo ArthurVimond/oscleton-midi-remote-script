@@ -1,7 +1,8 @@
 from _Framework.SessionComponent import SessionComponent
-from OscletonMixin import OscletonMixin
 
-import microjson
+import json as json
+from .OscletonMixin import OscletonMixin
+
 import re
 
 class OscletonBrowserComponent(SessionComponent, OscletonMixin):
@@ -17,8 +18,9 @@ class OscletonBrowserComponent(SessionComponent, OscletonMixin):
         self.add_callback('/live/browser/stop_preview', self._stop_preview)
 
 
-    def _get_browser_item(self, msg, src, useVST2CustomFolder, useAudioUnitsOnly, useVST2Only, useVST3Only):
-        browser_item_uri = msg[2]
+    def _get_browser_item(self, msg, useVST2CustomFolder, useAudioUnitsOnly, useVST2Only, useVST3Only):
+        self.log_message('_get_browser_item - msg: ' + str(msg))
+        browser_item_uri = msg[1]
 
         no_query_uri = self._remove_prefix(browser_item_uri, 'query:')
         decoded_uri = no_query_uri
@@ -133,40 +135,41 @@ class OscletonBrowserComponent(SessionComponent, OscletonMixin):
                 return self._find_next_node_browser_item(browser_item_uri, child_browser_item, nodes, next_node_index, useVST2CustomFolder, useAudioUnitsOnly, useVST2Only, useVST3Only)
 
 
-    def _preview_browser_item(self, msg, src):
+    def _preview_browser_item(self, msg):
 
         useVST2CustomFolder = self._checkVST2CustomFolderUse()
         useAudioUnitsOnly = self._checkAudioUnitsOnlyUse()
         useVST2Only = self._checkVST2OnlyUse()
         useVST3Only = self._checkVST3OnlyUse()
 
-        browser_item = self._get_browser_item(msg, src, useVST2CustomFolder, useAudioUnitsOnly, useVST2Only, useVST3Only)
+        browser_item = self._get_browser_item(msg, useVST2CustomFolder, useAudioUnitsOnly, useVST2Only, useVST3Only)
         if browser_item is not None:
             self._browser.preview_item(browser_item)
 
 
-    def _load_browser_item(self, msg, src):
+    def _load_browser_item(self, msg):
 
         useVST2CustomFolder = self._checkVST2CustomFolderUse()
         useAudioUnitsOnly = self._checkAudioUnitsOnlyUse()
         useVST2Only = self._checkVST2OnlyUse()
         useVST3Only = self._checkVST3OnlyUse()
 
-        browser_item = self._get_browser_item(msg, src, useVST2CustomFolder, useAudioUnitsOnly, useVST2Only, useVST3Only)
+        browser_item = self._get_browser_item(msg, useVST2CustomFolder, useAudioUnitsOnly, useVST2Only, useVST3Only)
         if browser_item is not None:
             self._browser.load_item(browser_item)
 
 
-    def _get_browser_item_children(self, msg, src):
-        after_child_browser_item_uri = msg[3]
-        page_size = msg[4]
+    def _get_browser_item_children(self, msg):
+        self.log_message('_get_browser_item_children - msg: ' + str(msg))
+        after_child_browser_item_uri = msg[2]
+        page_size = msg[3]
 
         useVST2CustomFolder = self._checkVST2CustomFolderUse()
         useAudioUnitsOnly = self._checkAudioUnitsOnlyUse()
         useVST2Only = self._checkVST2OnlyUse()
         useVST3Only = self._checkVST3OnlyUse()
 
-        browser_item = self._get_browser_item(msg, src, useVST2CustomFolder, useAudioUnitsOnly, useVST2Only, useVST3Only)
+        browser_item = self._get_browser_item(msg, useVST2CustomFolder, useAudioUnitsOnly, useVST2Only, useVST3Only)
         if browser_item is not None:
             children_items_json_array = []
             collect_started = False
@@ -202,7 +205,8 @@ class OscletonBrowserComponent(SessionComponent, OscletonMixin):
             'isLoadable': browser_item.is_loadable,
             'hasChildren': has_children
         }
-        browser_item_json = microjson.to_json(browser_item_mjson)
+        # browser_item_json = to_json(browser_item_mjson)
+        browser_item_json = json.dumps(browser_item_mjson)
         return str(browser_item_json)
     
 
@@ -264,7 +268,7 @@ class OscletonBrowserComponent(SessionComponent, OscletonMixin):
         return not useAudioUnits and not useVST2 and useVST3
 
 
-    def _stop_preview(self, msg, src):
+    def _stop_preview(self, msg):
         self._browser.stop_preview()
 
 

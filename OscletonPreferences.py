@@ -1,4 +1,4 @@
-from OscletonMixin import OscletonMixin
+from .OscletonMixin import OscletonMixin
 
 import os
 import json
@@ -79,8 +79,8 @@ class OscletonPreferences(OscletonMixin):
                 return None
 
 
-    def set_app_track(self, msg, src):
-        app_track = msg[2]
+    def set_app_track(self, msg):
+        app_track = msg[1]
 
         # Open json file for reading
         jsonFile = open(self._prefsFileFullPath, "r")
@@ -103,8 +103,8 @@ class OscletonPreferences(OscletonMixin):
             return app_track
 
 
-    def set_app_platform(self, msg, src):
-        app_platform = msg[2]
+    def set_app_platform(self, msg):
+        app_platform = msg[1]
 
         # Open json file for reading
         jsonFile = open(self._prefsFileFullPath, "r")

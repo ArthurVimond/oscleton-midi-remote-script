@@ -1,65 +1,54 @@
+import Live
 from _Framework.ChannelStripComponent import ChannelStripComponent
 from _Framework.SubjectSlot import subject_slot
 
-from OscletonDeviceComponent import OscletonDeviceComponent
-from OscletonParameterComponent import OscletonParameterComponent
-from OscletonMixin import OscletonMixin, wrap_init
+from .OscletonDeviceComponent import OscletonDeviceComponent
+from .OscletonMixin import OscletonMixin, wrap_init
+from .OscletonParameterComponent import OscletonParameterComponent
 
-import Live
 
 class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
-    
     @wrap_init
     def __init__(self, *a, **kw):
         self._track_id = None
         self._type = None
         self._devices = []
         self._sends = []
-        
+
         super(OscletonChannelStripComponent, self).__init__(*a, **kw)
-    
+
         self.set_default('_track_id')
-        
-        for t in [0, 1]:
-            for p in ['mute', 'solo', 'arm']:
-                self.add_mixer_callback('/live/'+self._track_types[t]+p, p)
-            for p in ['volume', 'panning', 'send']:
-                self.add_mixer_callback('/live/'+self._track_types[t]+p, p, 1)
-        
-        self.add_mixer_callback('/live/master/volume', 'volume', 1)
-        self.add_mixer_callback('/live/master/pan', 'pan', 1)
 
         self.add_callback('/live/track/stop', self._stop)
 
         for t in self._track_types:
-            self.add_callback('/live/'+t+'crossfader', self._crossfader)
+            self.add_callback('/live/' + t + 'crossfader', self._crossfader)
 
         for ty in ['track', 'return']:
-            self.add_simple_callback('/live/'+ty+'/name', '_track', 'name', self._is_track, getattr(self, '_on_track_name_changed'))
-            self.add_simple_callback('/live/'+ty+'/color', '_track', 'color', self._is_track, getattr(self, '_on_track_color_changed'))
-                    
-        self.add_callback('/live/track/state', self._track_state)
-        
-        for ty in self._track_types:
-            self.add_callback('/live/'+ty+'devices', self._device_list)
-            self.add_callback('/live/'+ty+'select', self._view)
+            self.add_simple_callback('/live/' + ty + '/name', '_track', 'name', self._is_track,
+                                     getattr(self, '_on_track_name_changed'))
+            self.add_simple_callback('/live/' + ty + '/color', '_track', 'color', self._is_track,
+                                     getattr(self, '_on_track_color_changed'))
 
+        self.add_callback('/live/track/state', self._track_state)
+
+        for ty in self._track_types:
+            self.add_callback('/live/' + ty + 'devices', self._device_list)
+            self.add_callback('/live/' + ty + 'select', self._view)
 
     def with_track(fn):
         def decorator(*a, **kw):
             if self._track is not None:
                 fn(*a, **kw)
-            
+
         return decorator
-            
-    
+
     @property
     def id(self):
         if self._track is not None:
             return self._track_id
         else:
             return -1
-
 
     def _get_name(self):
         if self._track is not None:
@@ -70,15 +59,12 @@ class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
     def _set_name(self, name):
         if self._track is not None:
             self._track.name = name
-    
+
     track_name = property(_get_name, _set_name)
-    
-    
+
     def disconnect(self):
-        OscletonMixin.disconnect(self)
         super(OscletonChannelStripComponent, self).disconnect()
-    
-    
+
     def _is_track(self, msg):
         if 'return' in msg[0]:
             ty = 1
@@ -86,77 +72,40 @@ class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
             ty = 2
         else:
             ty = 0
-        
-        check_id = msg[2] == self._track_id if ty != 2 else True
-        
-        # self.log_message(str(msg) + ' ' + str(self._track_id) + ' ' + str(self._type))
-        
+        check_id = msg[1] == self._track_id if ty != 2 else True
         return ty == self._type and check_id
-                     
-                          
-    def add_mixer_callback(self, addr, property, mixer = 0):
-        def cb(msg, src):
-            if self._is_track(msg) and self.is_enabled():
-                self.log_message('moo' + str(msg))
-                v = msg[3] if len(msg) == 4 else None
-
-                if self._track is not None:
-                    if property is not 'send':
-                        obj = getattr(self._track.mixer_device, property) if mixer else self._track
-                        pr = 'value' if mixer else property
-                        ot = float if mixer else int
-                        if v is not None:
-                            setattr(obj, pr, v)
-                        else:
-                            if self._type == 2:
-                                self.send('/live/master/'+property, ot(getattr(obj, pr)))
-                            else:
-                                self.send_default('/live/'+self._track_types[self._type]+property, ot(getattr(obj, pr)))
-                    else:
-                        # Sends
-                        send_id = msg[3]
-                        send_value = msg[4]
-                        send = self._sends[send_id]
-                        send.set_parameter_value(send_value)
-
-        self.add_callback(addr, cb)
-                          
 
     def set_track(self, track):
         if self._is_enabled_ovr:
             self._track_id, self._type = self.track_id_type(track)
             super(OscletonChannelStripComponent, self).set_track(track)
-            
+
             self._on_device_list_changed.subject = track
             self._on_track_color_changed.subject = track
             self._on_track_state_changed.subject = track
-            
+
             m = track.mixer_device if track else None
             self._on_volume_changed.subject = m.volume if track else None
             self._on_panning_changed.subject = m.panning if track else None
-            
+
             self._lo2__on_sends_changed()
             self._on_device_list_changed()
 
-    
     def _lo2__on_sends_changed(self):
         if self._track is not None and self._type != 2:
             diff = len(self._track.mixer_device.sends) - len(self._sends)
-            
+
             if diff > 0:
                 for i in range(diff):
                     self._sends.append(OscletonParameterComponent(True))
-            
+
             if diff < 0:
-                for i in range(len(self._sends)-1, len(self._track.mixer_device.sends)-1, -1):
+                for i in range(len(self._sends) - 1, len(self._track.mixer_device.sends) - 1, -1):
                     self._sends[i].disconnect()
                     self._sends.remove(self._sends[i])
-            
-            for i,s in enumerate(self._sends):
+
+            for i, s in enumerate(self._sends):
                 s.set_parameter(self._track.mixer_device.sends[i])
-    
-
-
 
     @subject_slot('devices')
     def _on_device_list_changed(self):
@@ -168,104 +117,93 @@ class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
                     self._devices.append(OscletonDeviceComponent())
 
             if diff < 0:
-                    for i in range(len(self._devices)-1, len(self._track.devices)-1, -1):
-                        self._devices[i].disconnect()
-                        self._devices.remove(self._devices[i])
-        
-            for i,dc in enumerate(self._devices):
+                for i in range(len(self._devices) - 1, len(self._track.devices) - 1, -1):
+                    self._devices[i].disconnect()
+                    self._devices.remove(self._devices[i])
+
+            for i, dc in enumerate(self._devices):
                 dc.set_device(self._track.devices[i])
 
             self._send_device_list()
 
-
     @subject_slot('value')
     def _on_volume_changed(self):
-        self.log_message(str(self._track_id) +  ' ' + str(self._type) + str(self._track) + str(self._track == self.song().master_track))
-        self.send_default('/live/'+self._track_types[self._type]+'volume', self._track.name, self._track.mixer_device.volume.value)
+        self.send_default('/live/' + self._track_types[self._type] + 'volume', self._track.name,
+                          self._track.mixer_device.volume.value)
 
     @subject_slot('value')
     def _on_panning_changed(self):
-        self.send_default('/live/'+self._track_types[self._type]+'panning', self._track.name, self._track.mixer_device.panning.value)
-
-    
-
+        self.send_default('/live/' + self._track_types[self._type] + 'panning', self._track.name,
+                          self._track.mixer_device.panning.value)
 
     # Callbacks
     def _on_mute_changed(self):
-        if self._type < 2 and self._type is not None:
-            self.send_default('/live/'+self._track_types[self._type]+'mute', self._track.name, self._track.mute)
+        if self._type is not None and self._type < 2:
+            self.send_default('/live/' + self._track_types[self._type] + 'mute', self._track.name, self._track.mute)
 
     def _on_solo_changed(self):
-        if self._type < 2 and self._type is not None:
-            self.send_default('/live/'+self._track_types[self._type]+'solo', self._track.name, self._track.solo)
+        if self._type is not None and self._type < 2:
+            self.send_default('/live/' + self._track_types[self._type] + 'solo', self._track.name, self._track.solo)
 
     def _on_arm_changed(self):
-        if self._type == 0 and self._type is not None and self._track.can_be_armed:
-            self.send_default('/live/'+self._track_types[self._type]+'arm', self._track.name, self._track.arm)
+        if self._type is not None and self._type == 0 and self._track.can_be_armed:
+            self.send_default('/live/' + self._track_types[self._type] + 'arm', self._track.name, self._track.arm)
 
     def _on_track_name_changed(self):
         if self._type is not None:
-            self.send_default('/live/'+self._track_types[self._type]+'name', self._track.name)
+            self.send_default('/live/' + self._track_types[self._type] + 'name', self._track.name)
 
     def _on_cf_assign_changed(self):
-        if self._type < 2 and self._type is not None:
-            self.send_default('/live/'+self._track_types[self._type]+'crossfader', self._track.mixer_device.crossfade_assign)
+        if self._type is not None and self._type < 2:
+            self.send_default('/live/' + self._track_types[self._type] + 'crossfader',
+                              self._track.mixer_device.crossfade_assign)
 
     # On track rename this is triggered, causing _on_arm_changed to be triggered
     def _on_input_routing_changed(self):
         pass
 
-
     @subject_slot('color')
     def _on_track_color_changed(self):
-        self.send_default('/live/'+self._track_types[self._type]+'color', self._track.color)
+        self.send_default('/live/' + self._track_types[self._type] + 'color', self._track.color)
 
-    
     @subject_slot('playing_slot_index')
     def _on_track_state_changed(self):
         self.send_default('/live/track/state', self._track.playing_slot_index)
-    
-    
 
-    #@with_track
-    def _device_list(self, msg, src):
+    # @with_track
+    def _device_list(self, msg):
         if self._is_track(msg) and self._track is not None:
             self._send_device_list()
 
-
     def _send_device_list(self):
-            devices = []
-            for i,d in enumerate(self._track.devices):
-                devices.append(i)
-                devices.append(d.name)
-               
-            if self._type == 2:
-                self.send('/live/'+self._track_types[self._type]+'devices', *devices)
-            else:
-                self.send_default('/live/'+self._track_types[self._type]+'devices', *devices)
+        devices = []
+        for i, d in enumerate(self._track.devices):
+            devices.append(i)
+            devices.append(d.name)
 
+        if self._type == 2:
+            self.send('/live/' + self._track_types[self._type] + 'devices', *devices)
+        else:
+            self.send_default('/live/' + self._track_types[self._type] + 'devices', *devices)
 
-    def _stop(self, msg, src):
+    def _stop(self, msg):
         if self._track is not None and self._is_track(msg):
             self._track.stop_all_clips()
 
-
-    def _track_state(self, msg, src):
+    def _track_state(self, msg):
         if self._is_track(msg):
             self._on_track_state_changed()
 
-
-    def _view(self, msg, src):
+    def _view(self, msg):
         if self._is_track(msg) and self._track is not None:
             self.song().view.selected_track = self._track
 
-
-    def _crossfader(self, msg, src):
+    def _crossfader(self, msg):
         if self._is_track(msg) and self._track is not None:
             # Master
             if self._type == 2:
                 self._track.mixer_device.crossfader.value = msg[2]
-                    
+
             # Assign xfader
             else:
                 v = msg[3] if len(msg) == 4 else None
@@ -278,4 +216,3 @@ class OscletonChannelStripComponent(ChannelStripComponent, OscletonMixin):
                         self._track.mixer_device.crossfade_assign = Live.MixerDevice.MixerDevice.crossfade_assignments.B
                 else:
                     self._on_cf_assign_changed()
-

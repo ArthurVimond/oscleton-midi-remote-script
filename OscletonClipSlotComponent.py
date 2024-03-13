@@ -3,7 +3,7 @@ import Live
 from _Framework.ClipSlotComponent import ClipSlotComponent
 from _Framework.SubjectSlot import subject_slot
 
-from OscletonMixin import OscletonMixin, wrap_init
+from .OscletonMixin import OscletonMixin, wrap_init
 
 
 class OscletonClipSlotComponent(ClipSlotComponent, OscletonMixin):
@@ -28,7 +28,7 @@ class OscletonClipSlotComponent(ClipSlotComponent, OscletonMixin):
         self.set_default('_track_id', '_scene_id')
     
         callbacks = {'color': 'color', 'name': 'name', 'warping': 'warping', 'looping': 'looping', 'loopstart': 'loop_start', 'loopend': 'loop_end', 'start': 'start_marker', 'end': 'end_marker', 'loopjump': 'loop_jump'}
-        for n,p in callbacks.iteritems():
+        for n,p in callbacks.items():
             self.add_simple_callback('/live/clip/'+n, '_clip_slot.clip', p, self._is_clip, getattr(self, '_on_clip_'+n+'_changed'))
     
         self.add_callback('/live/clip/play', self._fire)
