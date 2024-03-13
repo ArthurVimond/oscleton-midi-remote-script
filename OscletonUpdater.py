@@ -24,7 +24,7 @@ class OscletonUpdater(SessionComponent, OscletonMixin):
         app_platform = self._prefs.get_app_platform()
 
         oscleton_api_base_url = 'https://api.oscleton.com/'
-        latest_script_api_url = oscleton_api_base_url + 'v1/midi-remote-scripts/latest' + '?platform=' + app_platform + '&track=' + app_track
+        latest_script_api_url = oscleton_api_base_url + 'v1/midi-remote-scripts/latest' + '?platform=' + app_platform + '&track=' + app_track + '&pythonVersion=2'
 
         need_update = False
 
@@ -44,7 +44,7 @@ class OscletonUpdater(SessionComponent, OscletonMixin):
             # Download the Oscleton MIDI Remote Script and save it to the temp Documents/Oscleton directory
             oscleton_dir_path = os.path.expanduser("~/Documents/Oscleton")
             script_file_path = oscleton_dir_path + "/oscleton.zip"
-            url = 'https://oscleton.com/download/midi-remote-script/' + latest_midi_remote_script_version + '/oscleton.zip'
+            url = 'https://oscleton.com/download/midi-remote-script/python2/' + latest_midi_remote_script_version + '/oscleton.zip'
             self.log_message('Downloading latest Oscleton MIDI Remote Script: ' + latest_midi_remote_script_version)
 
             try:
@@ -54,11 +54,12 @@ class OscletonUpdater(SessionComponent, OscletonMixin):
                 with open(script_file_path, 'wb') as f:
                     f.write(data_to_write)
 
-                # Find Ableton Live directories
+                # Find Ableton Live directory
+                live_major_version = str(self.application().get_major_version())
                 if self._os == "Darwin":
                     files = os.listdir('/Applications')
                     for name in files:
-                        if 'Ableton Live' in name:
+                        if ('Ableton Live ' + live_major_version) in name:
                             self.ableton_dirs.append(name)
 
                             # Unzip the script to the MIDI Remote Scripts folder
@@ -69,7 +70,7 @@ class OscletonUpdater(SessionComponent, OscletonMixin):
                 elif self._os == "Windows":
                     files = os.listdir('C:\ProgramData\Ableton')
                     for name in files:
-                        if 'Live' in name:
+                        if ('Live ' + live_major_version) in name:
                                 self.ableton_dirs.append(name)
 
                                 # Unzip the script to the MIDI Remote Scripts folder
